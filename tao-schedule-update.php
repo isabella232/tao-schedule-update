@@ -270,11 +270,12 @@ class TAO_ScheduleUpdate {
 			$publishing_id = self::create_publishing_post( $post );
 			if ( $publishing_id ) {
 				wp_redirect( admin_url( 'post.php?action=edit&post=' . $publishing_id ) );
+				exit();
 			} else {
 				// translators: %1$s: post type, %2$s: post title.
 				$html  = sprintf( __( 'Could not schedule %1$s %2$s', 'tao-scheduleupdate-td' ), $post->post_type, '<i>' . htmlspecialchars( $post->post_title ) . '</i>' );
 				$html .= '<br><br>';
-				$html .= '<a href="' . esc_attr( admin_url( 'edit.php?post_type=' . $post->post_type ) ) . '">' . __( 'Back' ) . '</a>';
+				$html .= '<a href="' . esc_url( admin_url( 'edit.php?post_type=' . $post->post_type ) ) . '">' . __( 'Back' ) . '</a>';
 				wp_die( $html ); // WPCS: XSS okay.
 			}
 		}
@@ -290,6 +291,7 @@ class TAO_ScheduleUpdate {
 			$post = get_post( absint( wp_unslash( $_REQUEST['post'] ) ) );
 			self::publish_post( $post->ID );
 			wp_redirect( admin_url( 'edit.php?post_type=' . $post->post_type ) );
+			exit();
 		}
 	}
 
@@ -605,19 +607,21 @@ class TAO_ScheduleUpdate {
 		// and now for copying the terms.
 		$taxonomies = get_object_taxonomies( $source_post->post_type );
 		foreach ( $taxonomies as $taxonomy ) {
-			$post_terms = wp_get_object_terms( $source_post->ID, $taxonomy, array(
-				'orderby' => 'term_order',
-			) );
-			$terms = array();
-			foreach ( $post_terms as $term ) {
-				$terms[] = $term->slug;
+			if( function_exists('pll_get_post_translations') &&
+				!in_array($taxonomy, array('language', 'post_translations')) ) {
+				$post_terms = wp_get_object_terms( $source_post->ID, $taxonomy, array(
+					'orderby' => 'term_order',
+				) );
+				$terms = array();
+				foreach ( $post_terms as $term ) {
+					$terms[] = $term->slug;
+				}
+				// reset taxonomy to empty.
+				wp_set_object_terms( $destination_post->ID, null, $taxonomy );
+				// then add new terms.
+				$what = wp_set_object_terms( $destination_post->ID, $terms, $taxonomy );
 			}
-			// reset taxonomy to empty.
-			wp_set_object_terms( $destination_post->ID, null, $taxonomy );
-			// then add new terms.
-			$what = wp_set_object_terms( $destination_post->ID, $terms, $taxonomy );
 		}
-
 	}
 
 
@@ -772,3 +776,53 @@ add_filter( 'page_row_actions', array( 'TAO_ScheduleUpdate', 'page_row_actions' 
 add_filter( 'post_row_actions', array( 'TAO_ScheduleUpdate', 'page_row_actions' ), 10, 2 );
 add_filter( 'manage_pages_columns', array( 'TAO_ScheduleUpdate', 'manage_pages_columns' ) );
 add_filter( 'page_attributes_dropdown_pages_args', array( 'TAO_ScheduleUpdate', 'parent_dropdown_status' ) );
+
+
+//From here -> Jam3 modifications
+add_action( 'TAO_ScheduleUpdate\\create_publishing_post', 'fbbrcpl_creating_scheduled_update_post', 10, 1);
+function fbbrcpl_creating_scheduled_update_post( $new_post_id ) {
+	
+	global $running_schedule_action_flag;
+
+	if( !$running_schedule_action_flag ) {
+		
+		$new_post = get_post($new_post_id);
+		$original_post = get_post($new_post->post_parent);
+
+		if( function_exists('pll_get_post_translations') ) {
+			$running_schedule_action_flag = true;
+			
+			$original_translations = pll_get_post_translations( $original_post->ID );
+			$new_post_translations = array();
+
+			foreach($original_translations as $lang=>$translation_id) {
+				if( $translation_id === $original_post->ID ) {
+					$new_post_translations[$lang] = $new_post_id;
+				} else {
+					$translation_post = get_post( $translation_id );
+					$new_translation_id = TAO_ScheduleUpdate::create_publishing_post( $translation_post );
+					
+					$new_post_translations[$lang] = $new_translation_id;
+				}
+			}
+
+			if( function_exists('pll_save_post_translations') ) {
+				pll_save_post_translations( $new_post_translations );
+			}
+
+			$running_schedule_action_flag = false;
+		}
+	}
+}
+
+add_action('admin_notices','fbbrcpl_editing_scheduled_update_post_admin_notice');
+function fbbrcpl_editing_scheduled_update_post_admin_notice() {
+	global $post;
+	
+	if( $post->post_status === 'tao_sc_publish' ) { ?>
+		<div class="notice notice-warning">
+			<p>You are editing a Scheduled Update</p>
+		</div>
+	<?php
+	}
+}
