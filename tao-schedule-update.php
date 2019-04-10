@@ -55,7 +55,7 @@ class TAO_ScheduleUpdate {
 		require_once dirname( __FILE__ ) . '/options.php';
 
 		self::load_plugin_textdomain();
-		self::$tao_publish_label   = __( 'Scheduled Update', 'tao-scheduleupdate-td' );
+		self::$tao_publish_label   = __( 'Schedule Update', 'tao-scheduleupdate-td' );
 		self::$_tao_publish_metabox = __( 'Scheduled Update', 'tao-scheduleupdate-td' );
 		self::register_post_status();
 
@@ -210,7 +210,17 @@ class TAO_ScheduleUpdate {
 				$actions['copy_to_publish'] = '<a href="' . admin_url( 'admin.php' . $copy ) . '">' . __( 'Schedule recursive', 'tao-scheduleupdate-td' ) . '</a>';
 			}
 		} elseif ( 'trash' !== $post->post_status ) {
-			$actions['copy_to_publish'] = '<a href="' . admin_url( 'admin.php' . $copy ) . '">' . self::$tao_publish_label . '</a>';
+			$args = array(
+				'post_parent' => $post->ID,
+				'post_status' => self::$_tao_publish_status,
+			);
+			$children = get_children( $args );
+
+			if( is_array($children) && count($children)>0 ) {
+				$actions['copy_to_publish'] = '<b> Already Scheduled </b>';
+			} else {
+				$actions['copy_to_publish'] = '<a href="' . admin_url( 'admin.php' . $copy ) . '">' . self::$tao_publish_label . '</a>';
+			}
 		}
 
 		return $actions;
@@ -229,7 +239,7 @@ class TAO_ScheduleUpdate {
 		foreach ( $columns as $key => $val ) {
 			$new[ $key ] = $val;
 			if ( 'title' === $key ) {
-				$new['tao_publish'] = esc_html__( 'Releasedate', 'tao-scheduleupdate-td' );
+				$new['tao_publish'] = esc_html__( 'Release Date', 'tao-scheduleupdate-td' );
 			}
 		}
 		return $new;
@@ -383,9 +393,9 @@ class TAO_ScheduleUpdate {
 		$gmt_min = round( 60 * ($dec_time -$gmt_hour) );
 ?>
 			<p>
-				<strong><?php esc_html_e( 'Releasedate', 'tao-scheduleupdate-td' ); ?></strong>
+				<strong><?php esc_html_e( 'Release Date', 'tao-scheduleupdate-td' ); ?></strong>
 			</p>
-			<label class="screen-reader-text" for="<?php echo esc_attr( $metaname ); ?>"><?php esc_html_e( 'Releasedate', 'tao-scheduleupdate-td' ); ?></label>
+			<label class="screen-reader-text" for="<?php echo esc_attr( $metaname ); ?>"><?php esc_html_e( 'Release Date', 'tao-scheduleupdate-td' ); ?></label>
 			<input type="hidden" name="<?php echo esc_attr( $metaname ); ?>" id="<?php echo esc_attr( $metaname ); ?>" value="<?php echo esc_attr( $date2 ); ?>"/>
 			<input type="text" class="widefat" readonly="readonly" name="<?php echo esc_attr( $metaname ); ?>_display" id="<?php echo esc_attr( $metaname ); ?>_display" value="<?php echo esc_attr( $date ); ?>"/>
 			<p>
@@ -412,7 +422,7 @@ class TAO_ScheduleUpdate {
 			<p>
 				<div id="pastmsg" style="color:red; display:none;">
 					<?php
-					echo esc_html__( 'The releasedate is in the past.', 'tao-scheduleupdate-td' );
+					echo esc_html__( 'The release date is in the past.', 'tao-scheduleupdate-td' );
 					if ( TAO_ScheduleUpdate_Options::get( 'tsu_nodate' ) === 'nothing' ) {
 						echo esc_html__( 'This post will not be published.', 'tao-scheduleupdate-td' );
 					} else {
@@ -822,6 +832,9 @@ function fbbrcpl_editing_scheduled_update_post_admin_notice() {
 	if( $post->post_status === 'tao_sc_publish' ) { ?>
 		<div class="notice notice-warning">
 			<p>You are editing a Scheduled Update</p>
+		</div>
+		<div class="notice notice-warning">
+			<p>A copy of all related languages have been created to be scheduled too, to edit them just use the pencil icon next to each language flag on the righ sidebar.  </p>
 		</div>
 	<?php
 	}
