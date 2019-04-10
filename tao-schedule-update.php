@@ -18,7 +18,6 @@
  */
 class TAO_ScheduleUpdate {
 
-
 	/**
 	 * Label to be displayed to the user
 	 *
@@ -388,7 +387,7 @@ class TAO_ScheduleUpdate {
 			</p>
 			<label class="screen-reader-text" for="<?php echo esc_attr( $metaname ); ?>"><?php esc_html_e( 'Releasedate', 'tao-scheduleupdate-td' ); ?></label>
 			<input type="hidden" name="<?php echo esc_attr( $metaname ); ?>" id="<?php echo esc_attr( $metaname ); ?>" value="<?php echo esc_attr( $date2 ); ?>"/>
-			<input type="text" class="widefat" name="<?php echo esc_attr( $metaname ); ?>_display" id="<?php echo esc_attr( $metaname ); ?>_display" value="<?php echo esc_attr( $date ); ?>"/>
+			<input type="text" class="widefat" readonly="readonly" name="<?php echo esc_attr( $metaname ); ?>_display" id="<?php echo esc_attr( $metaname ); ?>_display" value="<?php echo esc_attr( $date ); ?>"/>
 			<p>
 				<strong><?php esc_html_e( 'Time', 'tao-scheduleupdate-td' ); ?></strong>
 			</p>
@@ -495,7 +494,8 @@ class TAO_ScheduleUpdate {
 	 * @return void
 	 */
 	public static function prevent_status_change( $new_status, $old_status, $post ) {
-		if ( $new_status === $old_status && $new_status === self::$_tao_publish_status ) { return;
+		if ( $new_status === $old_status && $new_status === self::$_tao_publish_status ) {
+			return;
 		}
 
 		if ( $old_status === self::$_tao_publish_status && 'trash' !== $new_status ) {
