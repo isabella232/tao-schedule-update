@@ -202,6 +202,8 @@ class TAO_ScheduleUpdate {
 	 * @return array Array of available actions for the given post
 	 */
 	public static function page_row_actions( $actions, $post ) {
+		wp_enqueue_script( self::$_tao_publish_status . '-functions.js', plugins_url( 'js/functions.js', __FILE__ ), array( 'jquery' ) );
+		
 		$copy = '?action=workflow_copy_to_publish&post=' . $post->ID . '&n=' . wp_create_nonce( 'workflow_copy_to_publish' . $post->ID );
 		if ( $post->post_status === self::$_tao_publish_status ) {
 			$action = '?action=workflow_publish_now&post=' . $post->ID . '&n=' . wp_create_nonce( 'workflow_publish_now' . $post->ID );
@@ -327,7 +329,7 @@ class TAO_ScheduleUpdate {
 		$url = '//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/blitzer/jquery-ui.min.css';
 		wp_enqueue_style( 'jquery-ui-blitzer', $url );
 		wp_enqueue_script( self::$_tao_publish_status . '-datepicker.js', plugins_url( 'js/publish-datepicker.js', __FILE__ ), array( 'jquery-ui-datepicker' ) );
-
+		
 		$months = array();
 		for ( $i = 1; $i <= 12; $i++ ) {
 			$months[] = date_i18n( 'F', strtotime( '2014-' . $i . '-01 00:00:00' ) );
