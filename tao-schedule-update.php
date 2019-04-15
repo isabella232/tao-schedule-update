@@ -203,7 +203,7 @@ class TAO_ScheduleUpdate {
 	 */
 	public static function page_row_actions( $actions, $post ) {
 		wp_enqueue_script( self::$_tao_publish_status . '-functions.js', plugins_url( 'js/functions.js', __FILE__ ), array( 'jquery' ) );
-		
+
 		$copy = '?action=workflow_copy_to_publish&post=' . $post->ID . '&n=' . wp_create_nonce( 'workflow_copy_to_publish' . $post->ID );
 		if ( $post->post_status === self::$_tao_publish_status ) {
 			$action = '?action=workflow_publish_now&post=' . $post->ID . '&n=' . wp_create_nonce( 'workflow_publish_now' . $post->ID );
@@ -329,7 +329,7 @@ class TAO_ScheduleUpdate {
 		$url = '//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/blitzer/jquery-ui.min.css';
 		wp_enqueue_style( 'jquery-ui-blitzer', $url );
 		wp_enqueue_script( self::$_tao_publish_status . '-datepicker.js', plugins_url( 'js/publish-datepicker.js', __FILE__ ), array( 'jquery-ui-datepicker' ) );
-		
+
 		$months = array();
 		for ( $i = 1; $i <= 12; $i++ ) {
 			$months[] = date_i18n( 'F', strtotime( '2014-' . $i . '-01 00:00:00' ) );
@@ -793,17 +793,17 @@ add_filter( 'page_attributes_dropdown_pages_args', array( 'TAO_ScheduleUpdate', 
 //From here -> Jam3 modifications
 add_action( 'TAO_ScheduleUpdate\\create_publishing_post', 'fbbrcpl_creating_scheduled_update_post', 10, 1);
 function fbbrcpl_creating_scheduled_update_post( $new_post_id ) {
-	
+
 	global $running_schedule_action_flag;
 
 	if( !$running_schedule_action_flag ) {
-		
+
 		$new_post = get_post($new_post_id);
 		$original_post = get_post($new_post->post_parent);
 
 		if( function_exists('pll_get_post_translations') ) {
 			$running_schedule_action_flag = true;
-			
+
 			$original_translations = pll_get_post_translations( $original_post->ID );
 			$new_post_translations = array();
 
@@ -813,7 +813,7 @@ function fbbrcpl_creating_scheduled_update_post( $new_post_id ) {
 				} else {
 					$translation_post = get_post( $translation_id );
 					$new_translation_id = TAO_ScheduleUpdate::create_publishing_post( $translation_post );
-					
+
 					$new_post_translations[$lang] = $new_translation_id;
 				}
 			}
@@ -830,13 +830,13 @@ function fbbrcpl_creating_scheduled_update_post( $new_post_id ) {
 add_action('admin_notices','fbbrcpl_editing_scheduled_update_post_admin_notice');
 function fbbrcpl_editing_scheduled_update_post_admin_notice() {
 	global $post;
-	
+
 	if( $post->post_status === 'tao_sc_publish' ) { ?>
 		<div class="notice notice-warning">
 			<p>You are editing a Scheduled Update</p>
 		</div>
 		<div class="notice notice-warning">
-			<p>A copy of all related languages have been created to be scheduled too, to edit them just use the pencil icon next to each language flag on the righ sidebar.  </p>
+			<p>A copy of all related languages have been created to be scheduled too, to edit them just use the pencil icon next to each language flag on the rigth sidebar.  </p>
 		</div>
 	<?php
 	}
