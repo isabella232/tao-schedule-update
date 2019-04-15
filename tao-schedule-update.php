@@ -836,7 +836,7 @@ function fbbrcpl_editing_scheduled_update_post_admin_notice() {
 			<p>You are editing a Scheduled Update</p>
 		</div>
 		<div class="notice notice-warning">
-			<p>A copy of all related languages have been created to be scheduled too, to edit them just use the pencil icon next to each language flag on the rigth sidebar.  </p>
+			<p>A copy of all related languages have been created to be scheduled too, to edit them just use the pencil icon next to each language flag on the right sidebar.  </p>
 		</div>
 	<?php
 	}
