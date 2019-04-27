@@ -172,6 +172,7 @@ class TAO_ScheduleUpdate {
 		global $post;
 		$arg = get_query_var( 'post_status' );
 		$the_post_types = self::get_post_types();
+
 		// default states for non public posts.
 		if ( ! isset( $the_post_types[ $post->post_type ] ) ) {
 			return $states;
@@ -188,7 +189,6 @@ class TAO_ScheduleUpdate {
 
 		return $states;
 	}
-
 
 	/**
 	 * Adds links for scheduled updates.
@@ -840,4 +840,46 @@ function fbbrcpl_editing_scheduled_update_post_admin_notice() {
 		</div>
 	<?php
 	}
+}
+
+add_action('admin_head-edit.php','add_custom_schedule_updates_button');
+function add_custom_schedule_updates_button() {
+	global $current_screen;
+
+	if( $current_screen->id === 'edit-page' ) {
+
+		$scheduled_items = get_all_schedule_updates_pages();
+
+		if( isset( $_GET['publish_all_schedule_updates'] ) && $_GET['publish_all_schedule_updates'] === 'true' ) {
+
+			if( is_array( $scheduled_items ) && count( $scheduled_items ) > 0 ) {
+
+				foreach($scheduled_items as $item2schedule) {
+					TAO_ScheduleUpdate::publish_post( $item2schedule->ID );
+				}
+
+			}
+
+		} elseif( is_array( $scheduled_items ) && count( $scheduled_items ) > 0 ) {
+			?>
+				<script type="text/javascript">
+					jQuery(document).ready( function() {
+						jQuery('<a class="add-new-h2" href="/wp-admin/edit.php?post_type=page&publish_all_schedule_updates=true">Publish Schedule Updates on Pages</a>' ).insertAfter( 'a.page-title-action' );
+					});
+				</script>
+			<?php
+		}
+	}
+}
+
+function get_all_schedule_updates_pages() {
+
+	$args = array(
+		'numberposts' => -1,
+		'post_status' => 'tao_sc_publish',
+		'post_type' => array('page')
+	);
+
+	return get_posts( $args );
+
 }
