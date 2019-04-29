@@ -848,71 +848,47 @@ function add_custom_schedule_updates_button() {
 
 	if( $current_screen->id === 'edit-page' ) {
 
-		$scheduled_items = get_all_schedule_updates_pages();
+		$scheduled_items = get_all_schedule_updates($current_screen->post_type);
+		$schedule_update_button_label = 'Publish Schedule Updates on Pages';
+		$edit_url = '/wp-admin/edit.php?post_type=page';
 
-		if( isset( $_GET['publish_all_schedule_updates'] ) && $_GET['publish_all_schedule_updates'] === 'true' ) {
-
-			if( is_array( $scheduled_items ) && count( $scheduled_items ) > 0 ) {
-
-				foreach($scheduled_items as $item2schedule) {
-					TAO_ScheduleUpdate::publish_post( $item2schedule->ID );
-				}
-
-			}
-
-		} elseif( is_array( $scheduled_items ) && count( $scheduled_items ) > 0 ) {
-			?>
-				<script type="text/javascript">
-					jQuery(document).ready( function() {
-						jQuery('<a class="add-new-h2" href="/wp-admin/edit.php?post_type=page&publish_all_schedule_updates=true">Publish Schedule Updates on Pages</a>' ).insertAfter( 'a.page-title-action' );
-					});
-				</script>
-			<?php
-		}
 	} elseif( $current_screen->id === 'edit-asset' ) {
 
-		$scheduled_items = get_all_schedule_updates_assets();
+		$scheduled_items = get_all_schedule_updates($current_screen->post_type);
+		$schedule_update_button_label = 'Publish Schedule Updates on Assets';
+		$edit_url = '/wp-admin/edit.php?post_type=asset';
 
-		if( isset( $_GET['publish_all_schedule_updates'] ) && $_GET['publish_all_schedule_updates'] === 'true' ) {
+	}
 
-			if( is_array( $scheduled_items ) && count( $scheduled_items ) > 0 ) {
+	if( isset( $_GET['publish_all_schedule_updates'] ) && $_GET['publish_all_schedule_updates'] === 'true' ) {
 
-				foreach($scheduled_items as $item2schedule) {
-					TAO_ScheduleUpdate::publish_post( $item2schedule->ID );
-				}
+		if( is_array( $scheduled_items ) && count( $scheduled_items ) > 0 ) {
 
+			foreach($scheduled_items as $item2schedule) {
+				TAO_ScheduleUpdate::publish_post( $item2schedule->ID );
 			}
 
-		} elseif( is_array( $scheduled_items ) && count( $scheduled_items ) > 0 ) {
-			?>
-				<script type="text/javascript">
-					jQuery(document).ready( function() {
-						jQuery('<a class="add-new-h2" href="/wp-admin/edit.php?post_type=asset&publish_all_schedule_updates=true">Publish Schedule Updates on Assets</a>' ).insertAfter( 'a.page-title-action' );
-					});
-				</script>
-			<?php
 		}
+
+	} elseif( is_array( $scheduled_items ) && count( $scheduled_items ) > 0 ) {
+		?>
+			<script type="text/javascript">
+				jQuery(document).ready( function() {
+					jQuery('<a class="add-new-h2" href="'.$edit_url.'&publish_all_schedule_updates=true">'.$schedule_update_button_label.'</a>' ).insertAfter( 'a.page-title-action' );
+				});
+			</script>
+		<?php
 	}
+
+
 }
 
-function get_all_schedule_updates_pages() {
+function get_all_schedule_updates($post_type='page') {
 
 	$args = array(
 		'numberposts' => -1,
 		'post_status' => 'tao_sc_publish',
 		'post_type' => array('page')
-	);
-
-	return get_posts( $args );
-
-}
-
-function get_all_schedule_updates_assets() {
-
-	$args = array(
-		'numberposts' => -1,
-		'post_status' => 'tao_sc_publish',
-		'post_type' => array('asset')
 	);
 
 	return get_posts( $args );
