@@ -877,7 +877,7 @@ function get_all_schedule_updates_pages() {
 	$args = array(
 		'numberposts' => -1,
 		'post_status' => 'tao_sc_publish',
-		'post_type' => array('page')
+		'post_type' => array('page, asset')
 	);
 
 	return get_posts( $args );
