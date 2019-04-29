@@ -869,6 +869,29 @@ function add_custom_schedule_updates_button() {
 				</script>
 			<?php
 		}
+	} elseif( $current_screen->id === 'edit-asset' ) {
+
+		$scheduled_items = get_all_schedule_updates_assets();
+
+		if( isset( $_GET['publish_all_schedule_updates'] ) && $_GET['publish_all_schedule_updates'] === 'true' ) {
+
+			if( is_array( $scheduled_items ) && count( $scheduled_items ) > 0 ) {
+
+				foreach($scheduled_items as $item2schedule) {
+					TAO_ScheduleUpdate::publish_post( $item2schedule->ID );
+				}
+
+			}
+
+		} elseif( is_array( $scheduled_items ) && count( $scheduled_items ) > 0 ) {
+			?>
+				<script type="text/javascript">
+					jQuery(document).ready( function() {
+						jQuery('<a class="add-new-h2" href="/wp-admin/edit.php?post_type=asset&publish_all_schedule_updates=true">Publish Schedule Updates on Assets</a>' ).insertAfter( 'a.page-title-action' );
+					});
+				</script>
+			<?php
+		}
 	}
 }
 
@@ -877,7 +900,19 @@ function get_all_schedule_updates_pages() {
 	$args = array(
 		'numberposts' => -1,
 		'post_status' => 'tao_sc_publish',
-		'post_type' => array('page, asset')
+		'post_type' => array('page')
+	);
+
+	return get_posts( $args );
+
+}
+
+function get_all_schedule_updates_assets() {
+
+	$args = array(
+		'numberposts' => -1,
+		'post_status' => 'tao_sc_publish',
+		'post_type' => array('asset')
 	);
 
 	return get_posts( $args );
