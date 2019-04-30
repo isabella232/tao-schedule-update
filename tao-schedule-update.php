@@ -888,7 +888,7 @@ function get_all_schedule_updates($post_type='page') {
 	$args = array(
 		'numberposts' => -1,
 		'post_status' => 'tao_sc_publish',
-		'post_type' => array('page')
+		'post_type' => array($post_type)
 	);
 
 	return get_posts( $args );
